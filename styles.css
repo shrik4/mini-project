@@ -1,0 +1,18 @@
+/* styles.css */
+body {
+    background-image: url("path_to_your_image.jpg"); /* Path to your background image */
+    background-size: cover; /* Cover the entire screen */
+    background-color: #f0f0f0; /* Fallback color */
+}
+
+.main {
+    background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent white background for content */
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.stApp {
+    background-color: rgba(255, 255, 255, 0.8); /* Slightly transparent white background for app content */
+    padding: 20px;
+    border-radius: 10px;
+}

@@ -1,0 +1,13 @@
+prefix=D:/Desktop/gemini/venu/Library
+exec_prefix=D:/Desktop/gemini/venu/Library
+libdir=D:/Desktop/gemini/venu/Library/lib
+sharedlibdir=D:/Desktop/gemini/venu/Library/lib
+includedir=D:/Desktop/gemini/venu/Library/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
