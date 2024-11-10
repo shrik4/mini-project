@@ -1,0 +1,18 @@
+conda create -n development python=3.10
+first we have to install anaconda 
+
+in path we must add
+C:\ProgramData\anaconda3\Library\bin\
+C:\ProgramData\anaconda3\Scripts\
+C:\ProgramData\anaconda3\condabin\
+
+
+to create env
+conda create -p venu python==3.10
+conda activate development
+pip install -r requirements.txt
+pip install -U langchain-community
+
+to rum the program online we have
+streamlit run app.py 
+
