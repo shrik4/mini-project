@@ -2,6 +2,8 @@ import streamlit as st
 import pyttsx3  # for Text-to-Speech Feature
 from fpdf import FPDF  # for Export to PDF Feature
 from PyPDF2 import PdfReader
+from docx import Document
+import pandas as pd
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
 import sqlite3
@@ -95,6 +97,21 @@ def get_pdf_text(pdf_docs):
             text += page.extract_text()
     return text
 
+def get_docx_text(docx_docs):
+    text = ""
+    for docx in docx_docs:
+        doc = Document(docx)
+        for para in doc.paragraphs:
+            text += para.text + "\n"
+    return text
+
+def get_excel_text(excel_docs):
+    text = ""
+    for excel in excel_docs:
+        df = pd.read_excel(excel)
+        text += df.to_string(index=False)
+    return text
+
 def get_text_chunks(text):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
     chunks = text_splitter.split_text(text)
@@ -103,7 +120,7 @@ def get_text_chunks(text):
 def get_vector_store(text_chunks):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
     if not text_chunks:
-        st.error("No text chunks were generated from the PDFs.")
+        st.error("No text chunks were generated from the files.")
         return None
     vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
     vector_store.save_local("faiss_index")
@@ -133,7 +150,7 @@ def export_to_pdf(user_question, response):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Chat with PDF using Gemini", ln=True, align='C')
+    pdf.cell(200, 10, txt="Chat with Files using Gemini", ln=True, align='C')
     
     user_question_cleaned = clean_text_for_pdf(user_question)
     output_text_cleaned = clean_text_for_pdf(response["output_text"])
@@ -160,9 +177,9 @@ def user_input(user_question):
 
 def main():
     init_db()
-    st.header("Smart PDF chat using Gemini🤖")
+    st.header("Smart pdf Chat using Gemini🤖")
 
-    user_question = st.text_input("Ask a Question from the PDF Files")
+    user_question = st.text_input("Ask a Question from the Files")
 
     if user_question:
         user_input(user_question)
@@ -176,10 +193,18 @@ def main():
 
     with st.sidebar:
         st.title("Menu:")
-        pdf_docs = st.file_uploader("Upload your PDF Files and Click on the Submit & Process Button", accept_multiple_files=True)
+        uploaded_files = st.file_uploader("Upload your PDF, DOCX, or Excel Files and Click on the Submit & Process Button", accept_multiple_files=True, type=['pdf', 'docx', 'xlsx'])
         if st.button("Submit & Process"):
             with st.spinner("Processing..."):
-                raw_text = get_pdf_text(pdf_docs)
+                raw_text = ""
+                for file in uploaded_files:
+                    if file.type == "application/pdf":
+                        raw_text += get_pdf_text([file])
+                    elif file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                        raw_text += get_docx_text([file])
+                    elif file.type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                        raw_text += get_excel_text([file])
+                
                 text_chunks = get_text_chunks(raw_text)
                 if text_chunks:
                     get_vector_store(text_chunks)
